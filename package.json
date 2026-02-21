@@ -2,7 +2,6 @@
   "name": "gym-stack",
   "private": true,
   "version": "0.7.0",
-  "homepage": "https://miishat.github.io/gymstack",
   "type": "module",
   "scripts": {
     "dev": "vite",
