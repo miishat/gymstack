@@ -4,10 +4,10 @@
  * @author Mishat
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Check, ChevronRight, ChevronLeft, X, Dumbbell } from 'lucide-react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { Plus, Check, ChevronRight, ChevronLeft, X, Dumbbell, Edit3, Star } from 'lucide-react';
 import { NeuCard, NeuButton, NeuInput, PageHeader } from '../components/UI';
-import { Workout, Exercise, ExerciseSet, MuscleGroup, CustomExercise } from '../types';
+import { Workout, Exercise, ExerciseSet, MuscleGroup, CustomExercise, WorkoutTemplate } from '../types';
 import { COMMON_EXERCISES, getMuscleColor } from '../constants';
 
 interface LoggerProps {
@@ -17,6 +17,7 @@ interface LoggerProps {
     initialWorkout?: Workout;
     customMuscleGroups: string[];
     customExercises: CustomExercise[];
+    templates: WorkoutTemplate[];
 }
 
 type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
@@ -24,7 +25,7 @@ type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
 /**
  * Logger View component providing a guided flow to create or edit a workout session.
  */
-export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout, customMuscleGroups, customExercises }) => {
+export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout, customMuscleGroups, customExercises, templates }) => {
     const [step, setStep] = useState<Step>('name');
     const [workoutName, setWorkoutName] = useState('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -33,8 +34,10 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
     const [currentMuscle, setCurrentMuscle] = useState<string | null>(null);
     const [currentExName, setCurrentExName] = useState('');
     const [currentSets, setCurrentSets] = useState<ExerciseSet[]>([{ id: '1', reps: 0, weight: 0, completed: false }]);
+    const [isBodyweight, setIsBodyweight] = useState(false);
+    const [isUnilateral, setIsUnilateral] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (initialWorkout && step === 'name' && !workoutName && exercises.length === 0) {
             setWorkoutName(initialWorkout.name);
             setExercises(initialWorkout.exercises);
@@ -60,6 +63,17 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
         setCurrentSets(prev => prev.filter(s => s.id !== id));
     }, []);
 
+    const handleEditExercise = useCallback((exerciseToEdit: Exercise) => {
+        setCurrentMuscle(exerciseToEdit.muscleGroup);
+        setCurrentExName(exerciseToEdit.name);
+        setCurrentSets(exerciseToEdit.sets);
+        setIsBodyweight(exerciseToEdit.isBodyweight || false);
+        setIsUnilateral(exerciseToEdit.isUnilateral || false);
+        // Remove from the finished list so we don't duplicate when saving again
+        setExercises(prev => prev.filter(ex => ex.id !== exerciseToEdit.id));
+        setStep('sets');
+    }, []);
+
     // Fetch ghost stats for the current exercise
     const ghostStats = useMemo(() => {
         if (!currentExName) return null;
@@ -72,9 +86,10 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
         // Ensure we inherit ghost stats if user left inputs blank (0) but placeholders were visible
         const finalSets = currentSets.map((set, i) => {
             const ghost = ghostStats && ghostStats[i];
+            const finalWeight = isBodyweight ? 0 : (set.weight === 0 && ghost ? ghost.weight : set.weight);
             return {
                 ...set,
-                weight: set.weight === 0 && ghost ? ghost.weight : set.weight,
+                weight: finalWeight,
                 reps: set.reps === 0 && ghost ? ghost.reps : set.reps
             };
         }).filter(s => s.reps > 0); // Must have at least reps to count
@@ -85,7 +100,9 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
             id: Date.now().toString(),
             name: currentExName,
             muscleGroup: currentMuscle,
-            sets: finalSets
+            sets: finalSets,
+            isBodyweight,
+            isUnilateral
         };
 
         setExercises(prev => [...prev, newEx]);
@@ -94,12 +111,18 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
         setCurrentMuscle(null);
         setCurrentExName('');
         setCurrentSets([{ id: Date.now().toString(), reps: 0, weight: 0, completed: false }]);
+        setIsBodyweight(false);
+        setIsUnilateral(false);
         setStep('review');
     }, [currentMuscle, currentExName, currentSets, ghostStats]);
 
     const finishWorkout = useCallback(() => {
         const totalVolume = exercises.reduce((acc, ex) => {
-            return acc + ex.sets.reduce((setAcc, set) => setAcc + (set.weight * set.reps), 0);
+            return acc + ex.sets.reduce((setAcc, set) => {
+                let vol = set.weight * set.reps;
+                if (ex.isUnilateral) vol *= 2;
+                return setAcc + vol;
+            }, 0);
         }, 0);
 
         const workout: Workout = {
@@ -119,6 +142,8 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
             setCurrentMuscle(null);
             setCurrentExName('');
             setCurrentSets([{ id: Date.now().toString(), reps: 0, weight: 0, completed: false }]);
+            setIsBodyweight(false);
+            setIsUnilateral(false);
         }, 200);
 
     }, [exercises, workoutName, onSave]);
@@ -151,6 +176,25 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                     >
                         Start Logging <ChevronRight size={18} />
                     </NeuButton>
+
+                    {templates && templates.length > 0 && (
+                        <div className="mt-8 pt-6 border-t border-aura-shadowDark">
+                            <h4 className="text-sm font-bold text-aura-textSecondary uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <Star size={16} /> Load Template
+                            </h4>
+                            <div className="space-y-3">
+                                {templates.map(t => (
+                                    <NeuButton key={t.id} onClick={() => {
+                                        setWorkoutName(t.name);
+                                        setExercises(t.exercises);
+                                        setStep('review');
+                                    }} className="w-full text-left !justify-start !shadow-neu-out-sm transition-all focus:!shadow-neu-in-sm text-aura-textPrimary font-semibold">
+                                        <span className="truncate">{t.name}</span>
+                                    </NeuButton>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </NeuCard>
             )}
 
@@ -221,9 +265,26 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                             <ChevronLeft size={20} />
                         </button>
                         <div>
-                            <h3 className="text-lg font-bold text-aura-textPrimary tracking-tight leading-tight">{currentExName}</h3>
+                            <h3 className="text-lg font-bold text-aura-textPrimary tracking-tight leading-tight flex items-center gap-2">
+                                {currentExName}
+                            </h3>
                             <p className="text-xs font-bold text-aura-textSecondary uppercase tracking-widest">{currentMuscle}</p>
                         </div>
+                    </div>
+
+                    <div className="flex gap-3 mb-6">
+                        <NeuButton
+                            onClick={() => setIsBodyweight(!isBodyweight)}
+                            className={`flex-1 text-[10px] font-bold py-2.5 transition-all ${isBodyweight ? '!text-aura-lavender !shadow-neu-in' : 'text-aura-textSecondary !shadow-neu-out'}`}
+                        >
+                            Bodyweight Only
+                        </NeuButton>
+                        <NeuButton
+                            onClick={() => setIsUnilateral(!isUnilateral)}
+                            className={`flex-1 text-[10px] font-bold py-2.5 transition-all ${isUnilateral ? '!text-aura-sage !shadow-neu-in' : 'text-aura-textSecondary !shadow-neu-out'}`}
+                        >
+                            Unilateral (Per Side)
+                        </NeuButton>
                     </div>
 
                     <div className="space-y-4">
@@ -244,10 +305,11 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                                     <div className="col-span-4 relative">
                                         <NeuInput
                                             type="number"
-                                            value={set.weight === 0 ? '' : set.weight}
+                                            value={isBodyweight ? '' : (set.weight === 0 ? '' : set.weight)}
                                             onChange={(e) => updateSet(set.id, 'weight', e.target.value)}
-                                            className={`text-center font-bold !py-2.5 ${set.weight === 0 && ghost ? 'placeholder:opacity-50 placeholder:text-aura-sage' : ''}`}
-                                            placeholder={ghost ? `${ghost.weight}` : "0"}
+                                            disabled={isBodyweight}
+                                            className={`text-center font-bold !py-2.5 transition-all ${isBodyweight ? 'opacity-30 cursor-not-allowed bg-aura-bg/50 shadow-none' : ''} ${set.weight === 0 && ghost && !isBodyweight ? 'placeholder:opacity-50 placeholder:text-aura-sage' : ''}`}
+                                            placeholder={isBodyweight ? "BW" : (ghost ? `${ghost.weight}` : "0")}
                                         />
                                     </div>
                                     <div className="col-span-4">
@@ -296,14 +358,25 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                                 <NeuCard key={ex.id} className="relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-2 h-full" style={{ backgroundColor: getMuscleColor(ex.muscleGroup) }} />
                                     <div className="pl-2">
-                                        <h4 className="font-bold text-aura-textPrimary text-lg tracking-tight mb-0.5">{ex.name}</h4>
+                                        <h4 className="font-bold text-aura-textPrimary text-lg tracking-tight justify-between flex items-center">
+                                            {ex.name}
+                                            <button onClick={() => handleEditExercise(ex)} className="text-aura-textSecondary hover:text-aura-sage p-1">
+                                                <Edit3 size={16} />
+                                            </button>
+                                        </h4>
                                         <p className="text-[10px] font-bold text-aura-textSecondary uppercase tracking-widest mb-4">{ex.muscleGroup}</p>
 
                                         <div className="space-y-2.5">
                                             {ex.sets.map((set, idx) => (
                                                 <div key={set.id} className="flex justify-between items-center text-sm px-4 py-2.5 bg-aura-bg shadow-neu-in rounded-xl">
                                                     <span className="font-bold text-aura-textSecondary">Set {idx + 1}</span>
-                                                    <span className="font-extrabold text-aura-textPrimary">{set.weight} <span className="text-xs font-semibold text-aura-textSecondary mx-1">lbs ×</span> {set.reps}</span>
+                                                    <span className="font-extrabold text-aura-textPrimary">
+                                                        {ex.isBodyweight ? 'BW' : `${set.weight}`}
+                                                        <span className="text-xs font-semibold text-aura-textSecondary mx-1">
+                                                            {ex.isBodyweight ? '×' : 'lbs ×'}
+                                                        </span>
+                                                        {set.reps}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>

@@ -5,11 +5,51 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Workout, ExerciseSet, CustomExercise } from '../types';
+import { Workout, ExerciseSet, CustomExercise, WorkoutTemplate } from '../types';
 
 const STORAGE_KEY = 'auralift_workouts';
 const EXERCISES_KEY = 'auralift_custom_exercises';
 const MUSCLES_KEY = 'auralift_custom_muscle_groups';
+const TEMPLATES_KEY = 'auralift_templates';
+
+export const calculate1RM = (weight: number, reps: number): number => {
+    if (reps === 0 || weight === 0) return 0;
+    if (reps === 1) return weight;
+    return weight * (1 + reps / 30);
+};
+
+const flagPRs = (workoutToSave: Workout, history: Workout[]) => {
+    const wClone = JSON.parse(JSON.stringify(workoutToSave)) as Workout;
+    const otherWorkouts = history.filter(w => w.id !== wClone.id);
+    const historicalMaxes: Record<string, number> = {};
+
+    otherWorkouts.forEach(w => {
+        w.exercises.forEach(ex => {
+            const m = ex.name.toLowerCase();
+            ex.sets.forEach(s => {
+                const oneRM = calculate1RM(s.weight, s.reps);
+                if (!historicalMaxes[m] || oneRM > historicalMaxes[m]) {
+                    historicalMaxes[m] = oneRM;
+                }
+            });
+        });
+    });
+
+    wClone.exercises.forEach(ex => {
+        const m = ex.name.toLowerCase();
+        ex.sets.forEach(s => {
+            const oneRM = calculate1RM(s.weight, s.reps);
+            // Must have some weight and reps to be a PR, and must beat existing 1RM
+            if (oneRM > (historicalMaxes[m] || 0) && s.weight > 0 && s.reps > 0) {
+                s.isPR = true;
+                historicalMaxes[m] = oneRM; // Update local max so next sets must beat this one
+            } else {
+                s.isPR = false;
+            }
+        });
+    });
+    return wClone;
+};
 
 /**
  * Custom hook providing workout data and actions.
@@ -46,6 +86,16 @@ export const useWorkoutStore = () => {
         }
     });
 
+    const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => {
+        try {
+            const item = window.localStorage.getItem(TEMPLATES_KEY);
+            return item ? JSON.parse(item) : [];
+        } catch (error) {
+            console.warn('Error reading localStorage for templates', error);
+            return [];
+        }
+    });
+
     // Save to local storage whenever workouts change
     useEffect(() => {
         try {
@@ -71,14 +121,28 @@ export const useWorkoutStore = () => {
         }
     }, [customMuscleGroups]);
 
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+        } catch (error) {
+            console.warn('Error setting localStorage for templates', error);
+        }
+    }, [templates]);
+
     /** Saves a completely new workout to the beginning of the history. */
     const addWorkout = useCallback((workout: Workout) => {
-        setWorkouts(prev => [workout, ...prev]);
+        setWorkouts(prev => {
+            const flaggedWorkout = flagPRs(workout, prev);
+            return [flaggedWorkout, ...prev];
+        });
     }, []);
 
     /** Replaces an existing workout (by matching ID) with its updated version. */
     const updateWorkout = useCallback((updatedWorkout: Workout) => {
-        setWorkouts(prev => prev.map(w => w.id === updatedWorkout.id ? updatedWorkout : w));
+        setWorkouts(prev => {
+            const flaggedWorkout = flagPRs(updatedWorkout, prev);
+            return prev.map(w => w.id === flaggedWorkout.id ? flaggedWorkout : w);
+        });
     }, []);
 
     /** Completely removes a workout from history based on its ID. */
@@ -100,6 +164,14 @@ export const useWorkoutStore = () => {
 
     const deleteCustomMuscleGroup = useCallback((group: string) => {
         setCustomMuscleGroups(prev => prev.filter(g => g !== group));
+    }, []);
+
+    const saveTemplate = useCallback((template: WorkoutTemplate) => {
+        setTemplates(prev => [template, ...prev]);
+    }, []);
+
+    const deleteTemplate = useCallback((id: string) => {
+        setTemplates(prev => prev.filter(t => t.id !== id));
     }, []);
 
     const importData = useCallback((workoutsData: Workout[], exercisesData: CustomExercise[], musclesData: string[]) => {
@@ -155,6 +227,7 @@ export const useWorkoutStore = () => {
 
     return {
         workouts,
+        templates,
         customExercises,
         customMuscleGroups,
         addWorkout,
@@ -164,6 +237,8 @@ export const useWorkoutStore = () => {
         deleteCustomExercise,
         addCustomMuscleGroup,
         deleteCustomMuscleGroup,
+        saveTemplate,
+        deleteTemplate,
         importData,
         getRecentVolumeData,
         getMuscleHeatmapData,

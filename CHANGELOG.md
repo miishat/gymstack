@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2026-02-21
+
+### Added
+- **1RM Calculator:** Added a dedicated 1-Rep Max calculator widget in the Tools tab using the Epley formula.
+- **Bodyweight & Unilateral Toggles:** Added new toggles in the Logger view to flag exercises as bodyweight-only or unilateral (per side).
+- **Accurate Volume Tracking:** Unilateral exercises now automatically double their volume calculation when saving.
+- **Improved UI Legibility:** Bodyweight-only exercises now intelligently replace "0 lbs" with "BW" across the Logger and History views.
+
+## [0.9.0] - 2026-02-21
+
+### Added
+- **Workout Templates:** Save completed workouts as templates to easily pre-populate future sessions in the Logger.
+- **PR Tracking:** Every logged set is now evaluated to determine the estimated 1-Rep Max (1RM). Sets that break previous records for that exercise get a gold "PR" badge in the History tab.
+- **Ghost Stats:** When loading a template, the Logger pre-fills inputs with placeholders of the weight and reps from the original session to guide the user.
+
 ## [0.8.0] - 2026-02-21
 
 ### Added

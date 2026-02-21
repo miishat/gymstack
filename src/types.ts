@@ -26,6 +26,7 @@ export interface ExerciseSet {
     reps: number;
     weight: number;
     completed: boolean;
+    isPR?: boolean; // Flag to indicate if this set was a Personal Record (1RM) at the time it was logged
 }
 
 /**
@@ -36,6 +37,8 @@ export interface Exercise {
     name: string;
     muscleGroup: string; // Changed from enum to string to support custom muscle groups
     sets: ExerciseSet[];
+    isBodyweight?: boolean;
+    isUnilateral?: boolean;
 }
 
 /**
@@ -52,12 +55,17 @@ export interface CustomExercise {
  */
 export interface Workout {
     id: string;
-    /** ISO format Date string when the workout occurred */
-    date: string;
     name: string;
+    date: string; // ISO string
     exercises: Exercise[];
-    /** The calculated total structural volume of the session (sum of weight * reps) */
     volume: number;
+    durationMinutes?: number;
+}
+
+export interface WorkoutTemplate {
+    id: string;
+    name: string;
+    exercises: Exercise[]; // Exercises with target/ghost sets
 }
 
 /**

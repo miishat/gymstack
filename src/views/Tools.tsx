@@ -5,15 +5,27 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Calculator } from 'lucide-react';
+import { Calculator, Zap } from 'lucide-react';
 import { NeuCard, NeuInput, NeuButton, PageHeader } from '../components/UI';
+import { calculate1RM } from '../hooks/useWorkoutStore';
 
 /**
  * Tools View component currently featuring a plate calculator for target weights.
  */
 export const ToolsView: React.FC = () => {
+    // Plate Calculator State
     const [targetWeight, setTargetWeight] = useState<string>('135');
     const [barWeight, setBarWeight] = useState<number>(45);
+
+    // 1RM Calculator State
+    const [calcRepWeight, setCalcRepWeight] = useState<string>('135');
+    const [calcReps, setCalcReps] = useState<string>('10');
+
+    const estimated1RM = useMemo(() => {
+        const w = parseFloat(calcRepWeight) || 0;
+        const r = parseInt(calcReps) || 0;
+        return calculate1RM(w, r);
+    }, [calcRepWeight, calcReps]);
 
     const individualPlates = useMemo(() => {
         const weight = parseFloat(targetWeight);
@@ -112,6 +124,48 @@ export const ToolsView: React.FC = () => {
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                </NeuCard>
+
+                {/* 1RM Calculator Component */}
+                <NeuCard>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-aura-bg shadow-neu-in rounded-full text-aura-sage">
+                            <Zap size={20} />
+                        </div>
+                        <h3 className="font-semibold text-aura-textPrimary text-lg">1RM Calculator</h3>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-aura-textSecondary mb-2 uppercase tracking-widest">Weight (lbs)</label>
+                                <NeuInput
+                                    type="number"
+                                    value={calcRepWeight}
+                                    onChange={(e) => setCalcRepWeight(e.target.value)}
+                                    className="text-xl font-bold py-3 text-center"
+                                    placeholder="0"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-aura-textSecondary mb-2 uppercase tracking-widest">Reps</label>
+                                <NeuInput
+                                    type="number"
+                                    value={calcReps}
+                                    onChange={(e) => setCalcReps(e.target.value)}
+                                    className="text-xl font-bold py-3 text-center"
+                                    placeholder="0"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-aura-shadowDark flex flex-col items-center justify-center">
+                            <h4 className="text-xs font-bold text-aura-textSecondary mb-2 uppercase tracking-widest">Estimated 1RM</h4>
+                            <div className="text-4xl font-black text-aura-sage tracking-tighter">
+                                {Math.round(estimated1RM)} <span className="text-lg font-bold text-aura-textSecondary tracking-normal">lbs</span>
+                            </div>
                         </div>
                     </div>
                 </NeuCard>

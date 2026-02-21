@@ -23,7 +23,19 @@ import { BottomNav } from './components/BottomNav';
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<ViewState>('dashboard');
     const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
-    const { workouts, customExercises, customMuscleGroups, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats, importData, addCustomExercise, deleteCustomExercise, addCustomMuscleGroup, deleteCustomMuscleGroup } = useWorkoutStore();
+    const { workouts, templates, customExercises, customMuscleGroups, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats, importData, addCustomExercise, deleteCustomExercise, addCustomMuscleGroup, deleteCustomMuscleGroup, saveTemplate } = useWorkoutStore();
+
+    const handleSaveTemplate = (workout: Workout) => {
+        saveTemplate({
+            id: Date.now().toString(),
+            name: `${workout.name} Template`,
+            exercises: workout.exercises.map(ex => ({
+                ...ex,
+                sets: ex.sets.map(s => ({ ...s, completed: false, isPR: false }))
+            }))
+        });
+        alert('Workout saved as a Template!');
+    };
 
     const handleSaveWorkout = (workout: Workout) => {
         if (editingWorkout) {
@@ -70,6 +82,7 @@ const App: React.FC = () => {
                                 initialWorkout={editingWorkout || undefined}
                                 customMuscleGroups={customMuscleGroups}
                                 customExercises={customExercises}
+                                templates={templates}
                             />
                         )}
                     </div>
@@ -87,6 +100,7 @@ const App: React.FC = () => {
                             workouts={getHistory()}
                             onEdit={handleEditWorkout}
                             onDelete={deleteWorkout}
+                            onSaveTemplate={handleSaveTemplate}
                         />
                     </div>
 
