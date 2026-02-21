@@ -4,7 +4,7 @@ Welcome to **Gym-Stack**, your beautiful, modern, and privacy-first workout comp
 
 Designed to feel right at home on your phone, Gym-Stack helps you log your achievements, track your volume, and smash your goals without ever getting in your way. 
 
-No sign-ups. No cloud syncing delays. Everything stays right on your device.
+No sign-ups. No cloud syncing delays. Everything stays right on your device. Built with premium micro-interactions and tactile haptic feedback.
 
 ---
 
@@ -37,15 +37,23 @@ Your command center. The Dashboard greets you with an overview of your recent ac
 - **Volume History**: A visual graph tracking your total lifting volume over your last 7 sessions. See the line go up, feel the gains.
 - **Muscle Activity**: A beautiful heatmap showing which muscle groups you've destroyed (and which ones you might be neglecting) over the past week.
 
+### 📊 Analytics (Stats)
+Dive deep into your progress over time.
+- **Exercise Trends**: Interactive line charts track your estimated 1-Rep Max (1RM) and total volume for specific exercises.
+- Visualize your continuous improvement and ensure you are applying progressive overload.
+
 ### 📝 Logger (Log)
 Where the magic happens. The Logger is designed to be lightning-fast between sets.
-- Log your session organically, step by step: choose the muscle, search for an exercise, input your numbers.
+- Log your session organically: choose the muscle, search for an exercise (or create a **Custom Exercise**), and input your numbers.
+- **Bodyweight & Unilateral Mode**: Easily toggle exercises as bodyweight-only or unilateral (calculates double volume automatically).
 - **Smart Ghosting**: When you log a new exercise, Gym-Stack automatically remembers the weight and reps you hit *last time*, directly filling in the placeholders so you always know what numbers you need to beat.
+- **Workout Templates**: Load previously saved templates to instantly pre-populate your entire routine, or save your current session as a template for next time.
 - Tap the **Checkmark** at the top right to complete the workout and save it into your history. 
 
-### 🧮 Tools (Plates)
-Stop doing gym math in your head. 
-- Enter your target weight, select your bar weight (45lb or 35lb), and it will immediately spit out the exact plates you need to load on each side.
+### 🧮 Tools (Plates & 1RM)
+Stop doing gym math in your head.
+- **Plate Calculator**: Enter your target weight, select your bar weight, and it will immediately spit out the exact plates you need to load on each side.
+- **1RM Calculator**: Quickly estimate your 1-Rep Max using the Epley formula by inputting weight and reps.
 
 ### ⏱️ Timer
 A built-in rest timer to keep you honest.
@@ -54,13 +62,15 @@ A built-in rest timer to keep you honest.
 ### 📖 History
 Your personal trophy room. 
 - Review all your past logged sessions. 
-- Tap on a workout to expand it and see the exact sets, reps, and weights. 
-- Make a mistake? Tap the **Edit** button to load the session back into the Logger and fix your numbers, or tap **Delete** to throw out the whole workout.
+- **PR Tracking**: Automatically identifies and awards a golden "PR" badge to sets that break your previous 1RM record for that exercise.
+- Expand a workout to see the exact sets, reps, and weights. 
+- Edit past sessions, delete them, or save them as reusable **Templates**.
 
 ### ⚙️ Settings (Config)
-Customize your ambiance.
+Customize your ambiance and manage your data.
 - **Theme Toggle**: Switch perfectly between modern Dark Mode and an incredibly clean Light Mode with a simple tap.
-- View the app version and general information.
+- **Data Management**: Export your entire workout history and custom exercises as a JSON backup, or import a previous backup to restore your data.
+- **Customization**: Manage and delete your custom exercises and dynamically-colored custom muscle groups.
 
 ---
 
@@ -72,6 +82,6 @@ Your gains are your business. Gym-Stack uses local storage architecture, meaning
 
 ## 🙏 Acknowledgements
 
-This application was significantly improved and modernized with the assistance of **Google's Antigravity**.
+This application was significantly improved and modernized with the assistance of Google's **Antigravity**.
 
 Now, go hit a PR. 🚀
