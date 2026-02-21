@@ -1,7 +1,16 @@
+/**
+ * @file Tools.tsx
+ * @description Utility calculators for quick gym math, such as the barbell plate calculator.
+ * @author Mishat
+ */
+
 import React, { useState, useMemo } from 'react';
 import { Calculator } from 'lucide-react';
-import { NeuCard, NeuInput, PageHeader } from '../components/UI';
+import { NeuCard, NeuInput, NeuButton, PageHeader } from '../components/UI';
 
+/**
+ * Tools View component currently featuring a plate calculator for target weights.
+ */
 export const ToolsView: React.FC = () => {
     const [targetWeight, setTargetWeight] = useState<string>('135');
     const [barWeight, setBarWeight] = useState<number>(45);
@@ -35,68 +44,78 @@ export const ToolsView: React.FC = () => {
     };
 
     return (
-        <div className="animate-in fade-in duration-500">
-            <PageHeader title="Plate Calculator" subtitle="Gym math, simplified." />
+        <div className="animate-in fade-in duration-500 pb-32">
+            <PageHeader title="Tools" subtitle="Gym math, simplified." />
 
-            <NeuCard>
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-aura-bg shadow-neu-in rounded-full text-aura-lavender">
-                        <Calculator size={20} />
-                    </div>
-                    <h3 className="font-semibold text-aura-textPrimary text-lg">Calculate Load</h3>
-                </div>
+            <div className="space-y-6">
 
-                <div className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium text-aura-textSecondary mb-2">Target Weight (lbs)</label>
-                        <NeuInput
-                            type="number"
-                            value={targetWeight}
-                            onChange={(e) => setTargetWeight(e.target.value)}
-                            className="text-2xl font-bold py-4"
-                            placeholder="0"
-                        />
+                {/* Plate Calculator Component */}
+                <NeuCard>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-aura-bg shadow-neu-in rounded-full text-aura-lavender">
+                            <Calculator size={20} />
+                        </div>
+                        <h3 className="font-semibold text-aura-textPrimary text-lg">Calculate Load</h3>
                     </div>
 
-                    <div className="flex gap-4">
-                        <label className="flex items-center gap-2 text-sm font-bold text-aura-textPrimary cursor-pointer">
-                            <input type="radio" name="bar" checked={barWeight === 45} onChange={() => setBarWeight(45)} className="accent-aura-sage w-4 h-4" />
-                            45 lb Bar
-                        </label>
-                        <label className="flex items-center gap-2 text-sm font-bold text-aura-textPrimary cursor-pointer">
-                            <input type="radio" name="bar" checked={barWeight === 35} onChange={() => setBarWeight(35)} className="accent-aura-sage w-4 h-4" />
-                            35 lb Bar
-                        </label>
-                    </div>
-
-                    <div className="pt-8 border-t border-aura-shadowDark">
-                        <h4 className="text-xs font-bold text-aura-textSecondary mb-6 uppercase tracking-widest text-center">Load per side</h4>
-
-                        {/* Scrollable Container ensures we don't overflow on massive lifts */}
-                        <div className="flex items-center justify-center min-h-[160px] overflow-x-auto py-4">
-
-                            <div className="flex items-center gap-1">
-                                {individualPlates.length === 0 ? (
-                                    <span className="text-aura-textSecondary font-bold bg-aura-bg px-4 py-2 rounded-xl shadow-neu-out">Bar Only</span>
-                                ) : (
-                                    /* Reverse the array: Big plates render first on the right, smaller plates extend leftwards */
-                                    [...individualPlates].reverse().map((weight, idx) => (
-                                        <div
-                                            key={`${weight}-${idx}`}
-                                            className={`flex items-center justify-center rounded-md border-2 border-aura-bg bg-aura-textPrimary text-aura-bg transition-all animate-in zoom-in ${plateSizes[weight]}`}
-                                        >
-                                            <span className={`transform -rotate-90 font-black tracking-tighter ${weight >= 25 ? 'text-xl' : 'text-sm'}`}>
-                                                {weight}
-                                            </span>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-aura-textSecondary mb-2">Target Weight (lbs)</label>
+                            <NeuInput
+                                type="number"
+                                value={targetWeight}
+                                onChange={(e) => setTargetWeight(e.target.value)}
+                                className="text-2xl font-bold py-4"
+                                placeholder="0"
+                            />
                         </div>
 
+                        <div className="flex gap-4">
+                            <NeuButton
+                                active={barWeight === 45}
+                                onClick={() => setBarWeight(45)}
+                                className={`flex-1 text-sm font-bold py-3 ${barWeight === 45 ? '!text-aura-lavender' : ''}`}
+                            >
+                                45 lb Bar
+                            </NeuButton>
+                            <NeuButton
+                                active={barWeight === 35}
+                                onClick={() => setBarWeight(35)}
+                                className={`flex-1 text-sm font-bold py-3 ${barWeight === 35 ? '!text-aura-lavender' : ''}`}
+                            >
+                                35 lb Bar
+                            </NeuButton>
+                        </div>
+
+                        <div className="pt-8 border-t border-aura-shadowDark">
+                            <h4 className="text-xs font-bold text-aura-textSecondary mb-6 uppercase tracking-widest text-center">Load per side</h4>
+
+                            {/* Scrollable Container ensures we don't overflow on massive lifts */}
+                            <div className="flex items-center justify-center min-h-[160px] overflow-x-auto py-4">
+
+                                <div className="flex items-center gap-1">
+                                    {individualPlates.length === 0 ? (
+                                        <span className="text-aura-textSecondary font-bold bg-aura-bg px-4 py-2 rounded-xl shadow-neu-out">Bar Only</span>
+                                    ) : (
+                                        /* Reverse the array: Big plates render first on the right, smaller plates extend leftwards */
+                                        [...individualPlates].reverse().map((weight, idx) => (
+                                            <div
+                                                key={`${weight}-${idx}`}
+                                                className={`flex items-center justify-center rounded-md border-2 border-aura-bg bg-aura-textPrimary text-aura-bg transition-all animate-in zoom-in ${plateSizes[weight]}`}
+                                            >
+                                                <span className={`transform -rotate-90 font-black tracking-tighter ${weight >= 25 ? 'text-xl' : 'text-sm'}`}>
+                                                    {weight}
+                                                </span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                </div>
-            </NeuCard>
+                </NeuCard>
+            </div>
         </div>
     );
 };

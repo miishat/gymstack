@@ -1,5 +1,11 @@
+/**
+ * @file BottomNav.tsx
+ * @description Main navigation bar component for switching between views.
+ * @author Mishat
+ */
+
 import React from 'react';
-import { Home, PlusSquare, Timer, History, Calculator } from 'lucide-react';
+import { Home, PlusSquare, Timer, History, Calculator, Settings } from 'lucide-react';
 import { ViewState } from '../types';
 
 interface NavProps {
@@ -7,6 +13,9 @@ interface NavProps {
     setView: (view: ViewState) => void;
 }
 
+/**
+ * Renders the fixed bottom navigation bar containing routing buttons for all views.
+ */
 export const BottomNav: React.FC<NavProps> = ({ currentView, setView }) => {
     const navItems = [
         { id: 'dashboard', icon: Home, label: 'Home' },
@@ -14,6 +23,7 @@ export const BottomNav: React.FC<NavProps> = ({ currentView, setView }) => {
         { id: 'tools', icon: Calculator, label: 'Plates' },
         { id: 'timer', icon: Timer, label: 'Timer' },
         { id: 'history', icon: History, label: 'History' },
+        { id: 'settings', icon: Settings, label: 'Config' },
     ] as const;
 
     return (
@@ -29,8 +39,8 @@ export const BottomNav: React.FC<NavProps> = ({ currentView, setView }) => {
                             className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 ${isActive ? 'text-aura-sage transform -translate-y-1' : 'text-aura-textSecondary hover:text-aura-textPrimary'
                                 }`}
                         >
-                            <div className={`p-2.5 rounded-2xl transition-all duration-300 ${isActive ? 'bg-aura-bg shadow-neu-in' : ''}`}>
-                                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                            <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-aura-bg shadow-neu-in' : ''}`}>
+                                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                             </div>
                             <span className={`text-[10px] font-bold tracking-wide mt-1.5 ${isActive ? 'opacity-100 text-aura-sage' : 'opacity-0'} transition-opacity`}>
                                 {item.label}

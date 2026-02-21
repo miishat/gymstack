@@ -1,3 +1,9 @@
+/**
+ * @file Logger.tsx
+ * @description Multi-step workout logging interface allowing users to record exercises, sets, and weights.
+ * @author Mishat
+ */
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Plus, Check, ChevronRight, ChevronLeft, X, Dumbbell } from 'lucide-react';
 import { NeuCard, NeuButton, NeuInput, PageHeader } from '../components/UI';
@@ -8,11 +14,15 @@ interface LoggerProps {
     onSave: (workout: Workout) => void;
     onCancel: () => void;
     getLastExerciseStats: (name: string) => ExerciseSet[] | null;
+    initialWorkout?: Workout;
 }
 
 type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
 
-export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats }) => {
+/**
+ * Logger View component providing a guided flow to create or edit a workout session.
+ */
+export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout }) => {
     const [step, setStep] = useState<Step>('name');
     const [workoutName, setWorkoutName] = useState('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -21,6 +31,14 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats }) 
     const [currentMuscle, setCurrentMuscle] = useState<MuscleGroup | null>(null);
     const [currentExName, setCurrentExName] = useState('');
     const [currentSets, setCurrentSets] = useState<ExerciseSet[]>([{ id: '1', reps: 0, weight: 0, completed: false }]);
+
+    React.useEffect(() => {
+        if (initialWorkout && step === 'name' && !workoutName && exercises.length === 0) {
+            setWorkoutName(initialWorkout.name);
+            setExercises(initialWorkout.exercises);
+            setStep('review');
+        }
+    }, [initialWorkout]);
 
     const handleNextStep = useCallback((next: Step) => setStep(next), []);
 
@@ -83,8 +101,8 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats }) 
         }, 0);
 
         const workout: Workout = {
-            id: Date.now().toString(),
-            date: new Date().toISOString(),
+            id: initialWorkout ? initialWorkout.id : Date.now().toString(),
+            date: initialWorkout ? initialWorkout.date : new Date().toISOString(),
             name: workoutName || 'Quick Session',
             exercises,
             volume: totalVolume
@@ -105,10 +123,12 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats }) 
 
     return (
         <div className="pb-32 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-center justify-between mb-8">
-                <PageHeader title="Log Session" subtitle={step === 'review' ? 'Review & Complete' : 'Build your workout'} />
+            <div className="flex items-start justify-between">
+                <div>
+                    <PageHeader title="Log Session" subtitle={step === 'review' ? 'Review & Complete' : 'Log your hardwork.'} />
+                </div>
                 {step === 'review' && exercises.length > 0 && (
-                    <NeuButton onClick={finishWorkout} className="!p-3 !rounded-full text-aura-sage shadow-neu-sm hover:shadow-neu-in-sm animate-in zoom-in">
+                    <NeuButton onClick={finishWorkout} className="!p-3 !rounded-full text-aura-sage shadow-neu-sm hover:shadow-neu-in-sm animate-in zoom-in flex-shrink-0 mt-1">
                         <Check size={24} strokeWidth={3} />
                     </NeuButton>
                 )}

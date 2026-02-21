@@ -1,3 +1,9 @@
+/**
+ * @file index.tsx
+ * @description React DOM entry point that mounts the application to the root HTML element.
+ * @author Mishat
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

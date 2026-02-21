@@ -1,8 +1,18 @@
+/**
+ * @file useWorkoutStore.ts
+ * @description LocalStorage-backed state management hook for all workout data, history, and statistics.
+ * @author Mishat
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { Workout, ExerciseSet } from '../types';
 
 const STORAGE_KEY = 'auralift_workouts';
 
+/**
+ * Custom hook providing workout data and actions.
+ * Synchronizes workout history seamlessly with the browser's localStorage.
+ */
 export const useWorkoutStore = () => {
     const [workouts, setWorkouts] = useState<Workout[]>(() => {
         try {
@@ -23,10 +33,17 @@ export const useWorkoutStore = () => {
         }
     }, [workouts]);
 
+    /** Saves a completely new workout to the beginning of the history. */
     const addWorkout = useCallback((workout: Workout) => {
         setWorkouts(prev => [workout, ...prev]);
     }, []);
 
+    /** Replaces an existing workout (by matching ID) with its updated version. */
+    const updateWorkout = useCallback((updatedWorkout: Workout) => {
+        setWorkouts(prev => prev.map(w => w.id === updatedWorkout.id ? updatedWorkout : w));
+    }, []);
+
+    /** Completely removes a workout from history based on its ID. */
     const deleteWorkout = useCallback((id: string) => {
         setWorkouts(prev => prev.filter(w => w.id !== id));
     }, []);
@@ -79,6 +96,7 @@ export const useWorkoutStore = () => {
     return {
         workouts,
         addWorkout,
+        updateWorkout,
         deleteWorkout,
         getRecentVolumeData,
         getMuscleHeatmapData,

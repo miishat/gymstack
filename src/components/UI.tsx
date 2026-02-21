@@ -1,3 +1,9 @@
+/**
+ * @file UI.tsx
+ * @description Core Neumorphic UI design system components used globally.
+ * @author Mishat
+ */
+
 import React from 'react';
 
 interface CardProps {
@@ -8,6 +14,9 @@ interface CardProps {
     style?: React.CSSProperties;
 }
 
+/**
+ * A standard Neumorphic card container. Can be toggled between inset and outset shadows.
+ */
 export const NeuCard: React.FC<CardProps> = ({ children, className = '', inset = false, onClick, style }) => {
     const shadowClass = inset ? 'shadow-neu-in' : 'shadow-neu-out';
     return (
@@ -21,6 +30,9 @@ export const NeuCard: React.FC<CardProps> = ({ children, className = '', inset =
     );
 };
 
+/**
+ * A Neumorphic actionable button component, supporting active/pressed states.
+ */
 export const NeuButton: React.FC<CardProps & { active?: boolean }> = ({ children, className = '', active = false, onClick, style }) => {
     const shadowClass = active ? 'shadow-neu-in-sm' : 'shadow-neu-sm';
     return (
@@ -34,6 +46,9 @@ export const NeuButton: React.FC<CardProps & { active?: boolean }> = ({ children
     );
 };
 
+/**
+ * A Neumorphic text input container optimized for forms and numerical data entry.
+ */
 export const NeuInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => {
     return (
         <input
@@ -43,6 +58,9 @@ export const NeuInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (
     );
 };
 
+/**
+ * Standardized page header for consistent typography at the top of main views.
+ */
 export const PageHeader: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => {
     return (
         <div className="mb-8 pr-16">

@@ -1,7 +1,16 @@
+/**
+ * @file Timer.tsx
+ * @description A customizable rest timer with visual progress and active state management.
+ * @author Mishat
+ */
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { NeuButton, PageHeader } from '../components/UI';
 
+/**
+ * Timer View component providing a simple, controllable countdown timer for rest periods.
+ */
 export const TimerView: React.FC = () => {
     const [duration, setDuration] = useState(90); // default 90s
     const [timeLeft, setTimeLeft] = useState(90);
@@ -66,20 +75,25 @@ export const TimerView: React.FC = () => {
     return (
         <div className="pb-32 animate-in fade-in duration-500 flex flex-col items-center">
             <div className="w-full self-start mb-8">
-                <PageHeader title="Vibe Timer" subtitle="Recover optimally." />
+                <PageHeader title="Timer" subtitle="Recover optimally." />
             </div>
 
-            <div className="relative flex items-center justify-center mb-12 mt-8">
+            <div className="relative flex items-center justify-center mb-12 mt-8 w-64 h-64">
                 <div
-                    className="absolute inset-0 rounded-full blur-3xl transition-colors duration-1000 ease-in-out"
+                    className="absolute rounded-full transition-all duration-1000 ease-in-out pointer-events-none"
                     style={{
-                        backgroundColor: glowColor,
-                        transform: isActive ? 'scale(1.2)' : 'scale(1)',
-                        opacity: isActive ? 0.8 : 0.3
+                        width: '160%',
+                        height: '160%',
+                        left: '-30%',
+                        top: '-30%',
+                        background: `radial-gradient(circle, ${glowColor} 0%, transparent 60%)`,
+                        transform: isActive ? 'scale(1.15)' : 'scale(1)',
+                        opacity: isActive ? 0.9 : 0.4,
+                        zIndex: 0
                     }}
                 />
 
-                <div className="relative z-10 w-64 h-64 rounded-full bg-aura-bg shadow-neu-out flex items-center justify-center">
+                <div className="relative z-10 w-full h-full rounded-full bg-aura-bg shadow-neu-out flex items-center justify-center">
                     <div className="w-52 h-52 rounded-full shadow-neu-in flex flex-col items-center justify-center relative overflow-hidden">
 
                         <div

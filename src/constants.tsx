@@ -1,5 +1,14 @@
+/**
+ * @file constants.tsx
+ * @description Global application constants including design tokens and static collections.
+ * @author Mishat
+ */
+
 import { MuscleGroup } from './types';
 
+/**
+ * Design system color mappings mapped directly to major muscle groups for consistent UI styling.
+ */
 export const MUSCLE_COLORS: Record<MuscleGroup, string> = {
     [MuscleGroup.Chest]: '#D2A3A9', // Rose
     [MuscleGroup.Back]: '#86A789',  // Sage
@@ -9,6 +18,9 @@ export const MUSCLE_COLORS: Record<MuscleGroup, string> = {
     [MuscleGroup.Core]: '#FDBA74',  // Soft Orange
 };
 
+/**
+ * Pre-compiled list of common exercises categorized by primary muscle group to assist with search and logging.
+ */
 export const COMMON_EXERCISES: Record<MuscleGroup, string[]> = {
     [MuscleGroup.Chest]: ['Bench Press', 'Incline Dumbbell Press', 'Push-ups', 'Cable Crossovers'],
     [MuscleGroup.Back]: ['Pull-ups', 'Barbell Row', 'Lat Pulldown', 'Deadlift'],

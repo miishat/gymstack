@@ -1,33 +1,47 @@
+/**
+ * @file App.tsx
+ * @description Main application shell, state provider, and view router for the Gym Stack application.
+ * @author Mishat
+ */
+
 import React, { useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
-import { ViewState } from './types';
+import { ViewState, Workout } from './types';
 import { useWorkoutStore } from './hooks/useWorkoutStore';
 import { Dashboard } from './views/Dashboard';
 import { Logger } from './views/Logger';
 import { ToolsView } from './views/Tools';
 import { TimerView } from './views/Timer';
 import { HistoryView } from './views/History';
+import { SettingsView } from './views/Settings';
 import { BottomNav } from './components/BottomNav';
 
+/**
+ * The root Application component.
+ * Manages the global `currentView` state, connects to the local storage hook (`useWorkoutStore`),
+ * and renders the corresponding view component based on user navigation.
+ */
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<ViewState>('dashboard');
-    const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
-    const { workouts, addWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats } = useWorkoutStore();
+    const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+    const { workouts, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats } = useWorkoutStore();
 
-    const toggleTheme = () => {
-        const nextState = !isDark;
-        setIsDark(nextState);
-        if (nextState) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
+    const handleSaveWorkout = (workout: Workout) => {
+        if (editingWorkout) {
+            updateWorkout(workout);
+            setEditingWorkout(null);
         } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
+            addWorkout(workout);
         }
+        setCurrentView('dashboard');
     };
 
-    const handleSaveWorkout = (workout: any) => {
-        addWorkout(workout);
+    const handleEditWorkout = (workout: Workout) => {
+        setEditingWorkout(workout);
+        setCurrentView('logger');
+    };
+
+    const handleCancelLog = () => {
+        setEditingWorkout(null);
         setCurrentView('dashboard');
     };
 
@@ -36,14 +50,6 @@ const App: React.FC = () => {
             {/* Mobile container constraint for desktop viewing */}
             <div className="w-full max-w-md bg-aura-bg min-h-screen shadow-2xl relative overflow-hidden">
 
-                {/* Global Theme Toggle - Fixed firmly to Top Right */}
-                <button
-                    onClick={toggleTheme}
-                    className="absolute top-10 right-6 p-3 bg-aura-bg shadow-neu-out active:shadow-neu-in rounded-full text-aura-textPrimary transition-all duration-300 hover:text-aura-sage z-50"
-                    aria-label="Toggle dark mode"
-                >
-                    {isDark ? <Sun size={20} strokeWidth={2.5} /> : <Moon size={20} strokeWidth={2.5} />}
-                </button>
 
                 {/* Main Content Area */}
                 <main className="h-full overflow-y-auto px-6 pt-12 pb-32">
@@ -56,11 +62,14 @@ const App: React.FC = () => {
                     </div>
 
                     <div className={currentView === 'logger' ? 'block' : 'hidden'}>
-                        <Logger
-                            onSave={handleSaveWorkout}
-                            onCancel={() => setCurrentView('dashboard')}
-                            getLastExerciseStats={getLastExerciseStats}
-                        />
+                        {currentView === 'logger' && (
+                            <Logger
+                                onSave={handleSaveWorkout}
+                                onCancel={handleCancelLog}
+                                getLastExerciseStats={getLastExerciseStats}
+                                initialWorkout={editingWorkout || undefined}
+                            />
+                        )}
                     </div>
 
                     <div className={currentView === 'tools' ? 'block' : 'hidden'}>
@@ -72,7 +81,15 @@ const App: React.FC = () => {
                     </div>
 
                     <div className={currentView === 'history' ? 'block' : 'hidden'}>
-                        <HistoryView workouts={getHistory()} />
+                        <HistoryView
+                            workouts={getHistory()}
+                            onEdit={handleEditWorkout}
+                            onDelete={deleteWorkout}
+                        />
+                    </div>
+
+                    <div className={currentView === 'settings' ? 'block' : 'hidden'}>
+                        <SettingsView />
                     </div>
                 </main>
 

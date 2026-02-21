@@ -1,3 +1,9 @@
+/**
+ * @file Dashboard.tsx
+ * @description The main landing view displaying summary statistics, volume history charts, and muscle intensity heatmaps.
+ * @author Mishat
+ */
+
 import React, { useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import { Activity, Flame, TrendingUp } from 'lucide-react';
@@ -11,6 +17,9 @@ interface DashboardProps {
     heatmapData: { muscle: string; intensity: number }[];
 }
 
+/**
+ * Dashboard View component responsible for rendering user workout analytics.
+ */
 export const Dashboard: React.FC<DashboardProps> = ({ workouts, volumeData, heatmapData }) => {
     const totalWorkouts = workouts.length;
     const thisWeekWorkouts = useMemo(() => {
@@ -69,12 +78,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ workouts, volumeData, heat
             </div>
 
             {/* Volume Chart */}
-            <NeuCard className="mb-8 p-0 overflow-hidden">
+            <NeuCard className="mb-8 !p-0 overflow-hidden">
                 <div className="p-6 pb-2">
-                    <div className="flex items-center gap-2.5">
-                        <TrendingUp size={20} className="text-aura-lavender" />
-                        <h3 className="font-bold text-aura-textPrimary tracking-tight">Volume History</h3>
-                    </div>
+                    <h3 className="font-bold text-aura-textPrimary flex items-center gap-2 tracking-tight">
+                        <TrendingUp size={20} className="text-aura-lavender" /> Volume History
+                    </h3>
                 </div>
                 <div className="h-48 w-full mt-4">
                     {volumeData.length > 0 ? (

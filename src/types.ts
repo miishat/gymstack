@@ -1,3 +1,12 @@
+/**
+ * @file types.ts
+ * @description Core TypeScript type definitions and interfaces for the Gym Stack application.
+ * @author Mishat
+ */
+
+/**
+ * Represents the primary muscle groups targeted during workouts.
+ */
 export enum MuscleGroup {
     Chest = 'Chest',
     Back = 'Back',
@@ -7,6 +16,9 @@ export enum MuscleGroup {
     Core = 'Core'
 }
 
+/**
+ * Represents a single set in an exercise, tracking reps and weight.
+ */
 export interface ExerciseSet {
     id: string;
     reps: number;
@@ -14,6 +26,9 @@ export interface ExerciseSet {
     completed: boolean;
 }
 
+/**
+ * Represents a logged exercise including the targeted muscle group and an array of sets.
+ */
 export interface Exercise {
     id: string;
     name: string;
@@ -21,12 +36,20 @@ export interface Exercise {
     sets: ExerciseSet[];
 }
 
+/**
+ * Represents a complete logged session (workout) with metadata and calculated volume.
+ */
 export interface Workout {
     id: string;
-    date: string; // ISO string
+    /** ISO format Date string when the workout occurred */
+    date: string;
     name: string;
     exercises: Exercise[];
-    volume: number; // calculated total (weight * reps)
+    /** The calculated total structural volume of the session (sum of weight * reps) */
+    volume: number;
 }
 
-export type ViewState = 'dashboard' | 'logger' | 'tools' | 'timer' | 'history';
+/**
+ * Union type to define the active view within the application routing state.
+ */
+export type ViewState = 'dashboard' | 'logger' | 'tools' | 'timer' | 'history' | 'settings';
