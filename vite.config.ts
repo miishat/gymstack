@@ -17,6 +17,8 @@ export default defineConfig({
                 theme_color: '#ffffff',
                 background_color: '#ffffff',
                 display: 'standalone',
+                scope: '/gymstack/',
+                start_url: '/gymstack/',
                 icons: [
                     {
                         src: 'pwa-192x192.svg',
