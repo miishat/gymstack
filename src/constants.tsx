@@ -1,4 +1,3 @@
-import React from 'react';
 import { MuscleGroup } from './types';
 
 export const MUSCLE_COLORS: Record<MuscleGroup, string> = {

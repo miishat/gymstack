@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
-import { NeuCard, NeuButton, PageHeader } from '../components/UI';
+import { NeuButton, PageHeader } from '../components/UI';
 
 export const TimerView: React.FC = () => {
     const [duration, setDuration] = useState(90); // default 90s

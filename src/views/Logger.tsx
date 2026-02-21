@@ -12,7 +12,7 @@ interface LoggerProps {
 
 type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
 
-export const Logger: React.FC<LoggerProps> = ({ onSave, onCancel, getLastExerciseStats }) => {
+export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats }) => {
     const [step, setStep] = useState<Step>('name');
     const [workoutName, setWorkoutName] = useState('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -270,7 +270,7 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, onCancel, getLastExercis
                         </NeuCard>
                     ) : (
                         <>
-                            {exercises.map((ex, i) => (
+                            {exercises.map((ex) => (
                                 <NeuCard key={ex.id} className="relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-2 h-full" style={{ backgroundColor: MUSCLE_COLORS[ex.muscleGroup] }} />
                                     <div className="pl-2">
