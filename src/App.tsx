@@ -23,7 +23,7 @@ import { BottomNav } from './components/BottomNav';
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<ViewState>('dashboard');
     const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
-    const { workouts, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats } = useWorkoutStore();
+    const { workouts, customExercises, customMuscleGroups, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats, importData, addCustomExercise, deleteCustomExercise, addCustomMuscleGroup, deleteCustomMuscleGroup } = useWorkoutStore();
 
     const handleSaveWorkout = (workout: Workout) => {
         if (editingWorkout) {
@@ -68,6 +68,8 @@ const App: React.FC = () => {
                                 onCancel={handleCancelLog}
                                 getLastExerciseStats={getLastExerciseStats}
                                 initialWorkout={editingWorkout || undefined}
+                                customMuscleGroups={customMuscleGroups}
+                                customExercises={customExercises}
                             />
                         )}
                     </div>
@@ -89,7 +91,16 @@ const App: React.FC = () => {
                     </div>
 
                     <div className={currentView === 'settings' ? 'block' : 'hidden'}>
-                        <SettingsView />
+                        <SettingsView
+                            workouts={workouts}
+                            customExercises={customExercises}
+                            customMuscleGroups={customMuscleGroups}
+                            importData={importData}
+                            addCustomExercise={addCustomExercise}
+                            deleteCustomExercise={deleteCustomExercise}
+                            addCustomMuscleGroup={addCustomMuscleGroup}
+                            deleteCustomMuscleGroup={deleteCustomMuscleGroup}
+                        />
                     </div>
                 </main>
 

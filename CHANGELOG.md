@@ -1,0 +1,20 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.8.0] - 2026-02-21
+
+### Added
+- **Custom Exercises:** Users can now add, edit, and delete their own custom exercises.
+- **Custom Muscle Groups:** Added support for dynamically creating custom muscle groups.
+- **Dynamic Color Generation:** Custom muscle groups automatically generate unique, aesthetic pastel colors based on their names.
+- **Data Backup System:** Added JSON Import and Export capabilities in Settings to prevent data loss across devices.
+- **Advanced Muscle Targeting:** "Arms" category has been split into specific "Biceps", "Triceps", and "Forearms" groups for more granular tracking.
+- **Settings UI Enhancements:** Added dedicated "Data Management" and "Custom Exercises" sections in the Settings view to manage the new features.
+
+### Changed
+- "Arms" has been replaced in the default muscle group list and pre-compiled exercises with "Biceps", "Triceps", and "Forearms".
+- "Data Management" icon in Settings updated to match the "Total Lifts" semantic color (rose).
+
+### Fixed
+- Fixed an issue where new custom muscle groups would require a page refresh before appearing in the Logger workout flow by properly lifting state.

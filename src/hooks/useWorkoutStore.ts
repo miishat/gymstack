@@ -5,9 +5,11 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Workout, ExerciseSet } from '../types';
+import { Workout, ExerciseSet, CustomExercise } from '../types';
 
 const STORAGE_KEY = 'auralift_workouts';
+const EXERCISES_KEY = 'auralift_custom_exercises';
+const MUSCLES_KEY = 'auralift_custom_muscle_groups';
 
 /**
  * Custom hook providing workout data and actions.
@@ -24,6 +26,26 @@ export const useWorkoutStore = () => {
         }
     });
 
+    const [customExercises, setCustomExercises] = useState<CustomExercise[]>(() => {
+        try {
+            const item = window.localStorage.getItem(EXERCISES_KEY);
+            return item ? JSON.parse(item) : [];
+        } catch (error) {
+            console.warn('Error reading localStorage for custom exercises', error);
+            return [];
+        }
+    });
+
+    const [customMuscleGroups, setCustomMuscleGroups] = useState<string[]>(() => {
+        try {
+            const item = window.localStorage.getItem(MUSCLES_KEY);
+            return item ? JSON.parse(item) : [];
+        } catch (error) {
+            console.warn('Error reading localStorage for custom muscle groups', error);
+            return [];
+        }
+    });
+
     // Save to local storage whenever workouts change
     useEffect(() => {
         try {
@@ -32,6 +54,22 @@ export const useWorkoutStore = () => {
             console.warn('Error setting localStorage', error);
         }
     }, [workouts]);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(EXERCISES_KEY, JSON.stringify(customExercises));
+        } catch (error) {
+            console.warn('Error setting localStorage for custom exercises', error);
+        }
+    }, [customExercises]);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(MUSCLES_KEY, JSON.stringify(customMuscleGroups));
+        } catch (error) {
+            console.warn('Error setting localStorage for custom muscle groups', error);
+        }
+    }, [customMuscleGroups]);
 
     /** Saves a completely new workout to the beginning of the history. */
     const addWorkout = useCallback((workout: Workout) => {
@@ -46,6 +84,28 @@ export const useWorkoutStore = () => {
     /** Completely removes a workout from history based on its ID. */
     const deleteWorkout = useCallback((id: string) => {
         setWorkouts(prev => prev.filter(w => w.id !== id));
+    }, []);
+
+    const addCustomExercise = useCallback((exercise: CustomExercise) => {
+        setCustomExercises(prev => [...prev, exercise]);
+    }, []);
+
+    const deleteCustomExercise = useCallback((id: string) => {
+        setCustomExercises(prev => prev.filter(ex => ex.id !== id));
+    }, []);
+
+    const addCustomMuscleGroup = useCallback((group: string) => {
+        setCustomMuscleGroups(prev => prev.includes(group) ? prev : [...prev, group]);
+    }, []);
+
+    const deleteCustomMuscleGroup = useCallback((group: string) => {
+        setCustomMuscleGroups(prev => prev.filter(g => g !== group));
+    }, []);
+
+    const importData = useCallback((workoutsData: Workout[], exercisesData: CustomExercise[], musclesData: string[]) => {
+        setWorkouts(workoutsData);
+        setCustomExercises(exercisesData || []);
+        setCustomMuscleGroups(musclesData || []);
     }, []);
 
     const getRecentVolumeData = useCallback(() => {
@@ -95,9 +155,16 @@ export const useWorkoutStore = () => {
 
     return {
         workouts,
+        customExercises,
+        customMuscleGroups,
         addWorkout,
         updateWorkout,
         deleteWorkout,
+        addCustomExercise,
+        deleteCustomExercise,
+        addCustomMuscleGroup,
+        deleteCustomMuscleGroup,
+        importData,
         getRecentVolumeData,
         getMuscleHeatmapData,
         getLastExerciseStats,

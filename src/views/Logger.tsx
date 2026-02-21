@@ -7,14 +7,16 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Plus, Check, ChevronRight, ChevronLeft, X, Dumbbell } from 'lucide-react';
 import { NeuCard, NeuButton, NeuInput, PageHeader } from '../components/UI';
-import { Workout, Exercise, ExerciseSet, MuscleGroup } from '../types';
-import { COMMON_EXERCISES, MUSCLE_COLORS } from '../constants';
+import { Workout, Exercise, ExerciseSet, MuscleGroup, CustomExercise } from '../types';
+import { COMMON_EXERCISES, getMuscleColor } from '../constants';
 
 interface LoggerProps {
     onSave: (workout: Workout) => void;
     onCancel: () => void;
     getLastExerciseStats: (name: string) => ExerciseSet[] | null;
     initialWorkout?: Workout;
+    customMuscleGroups: string[];
+    customExercises: CustomExercise[];
 }
 
 type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
@@ -22,13 +24,13 @@ type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
 /**
  * Logger View component providing a guided flow to create or edit a workout session.
  */
-export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout }) => {
+export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout, customMuscleGroups, customExercises }) => {
     const [step, setStep] = useState<Step>('name');
     const [workoutName, setWorkoutName] = useState('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
 
     // Current exercise state
-    const [currentMuscle, setCurrentMuscle] = useState<MuscleGroup | null>(null);
+    const [currentMuscle, setCurrentMuscle] = useState<string | null>(null);
     const [currentExName, setCurrentExName] = useState('');
     const [currentSets, setCurrentSets] = useState<ExerciseSet[]>([{ id: '1', reps: 0, weight: 0, completed: false }]);
 
@@ -161,12 +163,12 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                         </button>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        {Object.values(MuscleGroup).map(mg => (
+                        {[...Object.values(MuscleGroup), ...customMuscleGroups].map(mg => (
                             <NeuButton
                                 key={mg}
                                 onClick={() => { setCurrentMuscle(mg); handleNextStep('exercise'); }}
                                 className="flex items-center justify-center py-6 font-bold tracking-tight text-lg"
-                                style={{ color: MUSCLE_COLORS[mg] }}
+                                style={{ color: getMuscleColor(mg) }}
                             >
                                 {mg}
                             </NeuButton>
@@ -194,7 +196,7 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                     <div className="space-y-4 mt-8">
                         <p className="text-xs font-bold text-aura-textSecondary uppercase tracking-widest">Common {currentMuscle}</p>
                         <div className="grid gap-3">
-                            {COMMON_EXERCISES[currentMuscle].map(ex => (
+                            {[...(COMMON_EXERCISES[currentMuscle] || []), ...customExercises.filter(ce => ce.muscleGroup === currentMuscle).map(ce => ce.name)].map(ex => (
                                 <div
                                     key={ex}
                                     onClick={() => { setCurrentExName(ex); handleNextStep('sets'); }}
@@ -292,7 +294,7 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                         <>
                             {exercises.map((ex) => (
                                 <NeuCard key={ex.id} className="relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-2 h-full" style={{ backgroundColor: MUSCLE_COLORS[ex.muscleGroup] }} />
+                                    <div className="absolute top-0 left-0 w-2 h-full" style={{ backgroundColor: getMuscleColor(ex.muscleGroup) }} />
                                     <div className="pl-2">
                                         <h4 className="font-bold text-aura-textPrimary text-lg tracking-tight mb-0.5">{ex.name}</h4>
                                         <p className="text-[10px] font-bold text-aura-textSecondary uppercase tracking-widest mb-4">{ex.muscleGroup}</p>

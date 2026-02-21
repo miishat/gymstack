@@ -11,7 +11,9 @@ export enum MuscleGroup {
     Chest = 'Chest',
     Back = 'Back',
     Legs = 'Legs',
-    Arms = 'Arms',
+    Biceps = 'Biceps',
+    Triceps = 'Triceps',
+    Forearms = 'Forearms',
     Shoulders = 'Shoulders',
     Core = 'Core'
 }
@@ -32,8 +34,17 @@ export interface ExerciseSet {
 export interface Exercise {
     id: string;
     name: string;
-    muscleGroup: MuscleGroup;
+    muscleGroup: string; // Changed from enum to string to support custom muscle groups
     sets: ExerciseSet[];
+}
+
+/**
+ * Represents a user-defined custom exercise.
+ */
+export interface CustomExercise {
+    id: string;
+    name: string;
+    muscleGroup: string;
 }
 
 /**
