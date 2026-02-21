@@ -1,7 +1,7 @@
 {
   "name": "gym-stack",
   "private": true,
-  "version": "0.10.0",
+  "version": "0.11.0",
   "homepage": "https://miishat.github.io/gymstack",
   "type": "module",
   "scripts": {
@@ -11,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "framer-motion": "^12.34.3",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.471.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

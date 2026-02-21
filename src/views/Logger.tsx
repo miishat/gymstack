@@ -5,10 +5,11 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Plus, Check, ChevronRight, ChevronLeft, X, Dumbbell, Edit3, Star } from 'lucide-react';
+import { Plus, Check, ChevronRight, ChevronLeft, X, Dumbbell, Edit3, Star, Trash2 } from 'lucide-react';
 import { NeuCard, NeuButton, NeuInput, PageHeader } from '../components/UI';
 import { Workout, Exercise, ExerciseSet, MuscleGroup, CustomExercise, WorkoutTemplate } from '../types';
 import { COMMON_EXERCISES, getMuscleColor } from '../constants';
+import { triggerHaptic } from '../utils/haptics';
 
 interface LoggerProps {
     onSave: (workout: Workout) => void;
@@ -18,6 +19,7 @@ interface LoggerProps {
     customMuscleGroups: string[];
     customExercises: CustomExercise[];
     templates: WorkoutTemplate[];
+    onDeleteTemplate: (id: string) => void;
 }
 
 type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
@@ -25,7 +27,7 @@ type Step = 'name' | 'muscle' | 'exercise' | 'sets' | 'review';
 /**
  * Logger View component providing a guided flow to create or edit a workout session.
  */
-export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout, customMuscleGroups, customExercises, templates }) => {
+export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, initialWorkout, customMuscleGroups, customExercises, templates, onDeleteTemplate }) => {
     const [step, setStep] = useState<Step>('name');
     const [workoutName, setWorkoutName] = useState('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -48,6 +50,7 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
     const handleNextStep = useCallback((next: Step) => setStep(next), []);
 
     const handleAddSet = useCallback(() => {
+        triggerHaptic(50);
         setCurrentSets(prev => {
             const last = prev[prev.length - 1];
             return [...prev, { id: Date.now().toString(), reps: last.reps, weight: last.weight, completed: false }];
@@ -132,6 +135,8 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
             exercises,
             volume: totalVolume
         };
+
+        triggerHaptic([50, 50, 50]); // Monumental feedback for finishing a workout
         onSave(workout);
 
         // Reset Logger state seamlessly after saving
@@ -184,13 +189,21 @@ export const Logger: React.FC<LoggerProps> = ({ onSave, getLastExerciseStats, in
                             </h4>
                             <div className="space-y-3">
                                 {templates.map(t => (
-                                    <NeuButton key={t.id} onClick={() => {
-                                        setWorkoutName(t.name);
-                                        setExercises(t.exercises);
-                                        setStep('review');
-                                    }} className="w-full text-left !justify-start !shadow-neu-out-sm transition-all focus:!shadow-neu-in-sm text-aura-textPrimary font-semibold">
-                                        <span className="truncate">{t.name}</span>
-                                    </NeuButton>
+                                    <div key={t.id} className="flex gap-2">
+                                        <NeuButton onClick={() => {
+                                            setWorkoutName(t.name);
+                                            setExercises(t.exercises);
+                                            setStep('review');
+                                        }} className="flex-1 text-left !justify-start !shadow-neu-out-sm transition-all focus:!shadow-neu-in-sm text-aura-textPrimary font-semibold overflow-hidden">
+                                            <span className="truncate block">{t.name}</span>
+                                        </NeuButton>
+                                        <NeuButton
+                                            onClick={() => onDeleteTemplate(t.id)}
+                                            className="!px-4 !shadow-neu-out-sm text-aura-rose hover:text-red-500 flex-shrink-0"
+                                        >
+                                            <Trash2 size={18} />
+                                        </NeuButton>
+                                    </div>
                                 ))}
                             </div>
                         </div>

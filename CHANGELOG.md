@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2026-02-21
+
+### Added
+- **Analytics View:** Added a dedicated 'Stats' view with interactive line charts to track 1RM and Volume progress per-exercise.
+- **Premium Micro-Interactions:** Implemented `framer-motion` spring animations across all core UI components.
+- **Haptic Feedback:** Integrated the Web Vibration API for tactile feedback during interactions.
+- **Toast Notifications:** Added a modern, globally positioned Toast overlay, replacing native browser alerts for a sleeker experience.
+- **Template Management:** Added the ability to delete saved templates from the Logger view, and refined template naming rules.
+
 ## [0.10.0] - 2026-02-21
 
 ### Added

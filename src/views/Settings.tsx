@@ -309,7 +309,7 @@ export const SettingsView: React.FC<SettingsProps> = ({
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-aura-textSecondary">App Version</span>
-                            <span className="text-sm font-bold text-aura-textPrimary tracking-tight">0.10.0</span>
+                            <span className="text-sm font-bold text-aura-textPrimary tracking-tight">0.11.0</span>
                         </div>
 
                         <div className="flex items-center justify-between pt-4 border-t border-aura-shadowDark">

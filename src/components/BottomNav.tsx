@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Home, PlusSquare, Timer, History, Calculator, Settings } from 'lucide-react';
+import { Home, PlusSquare, Timer, History, Calculator, Settings, LineChart } from 'lucide-react';
 import { ViewState } from '../types';
 
 interface NavProps {
@@ -23,6 +23,7 @@ export const BottomNav: React.FC<NavProps> = ({ currentView, setView }) => {
         { id: 'tools', icon: Calculator, label: 'Plates' },
         { id: 'timer', icon: Timer, label: 'Timer' },
         { id: 'history', icon: History, label: 'History' },
+        { id: 'analytics', icon: LineChart, label: 'Stats' },
         { id: 'settings', icon: Settings, label: 'Config' },
     ] as const;
 

@@ -71,4 +71,4 @@ export interface WorkoutTemplate {
 /**
  * Union type to define the active view within the application routing state.
  */
-export type ViewState = 'dashboard' | 'logger' | 'tools' | 'timer' | 'history' | 'settings';
+export type ViewState = 'dashboard' | 'logger' | 'tools' | 'timer' | 'history' | 'analytics' | 'settings';

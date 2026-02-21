@@ -12,8 +12,10 @@ import { Logger } from './views/Logger';
 import { ToolsView } from './views/Tools';
 import { TimerView } from './views/Timer';
 import { HistoryView } from './views/History';
+import { AnalyticsView } from './views/Analytics';
 import { SettingsView } from './views/Settings';
 import { BottomNav } from './components/BottomNav';
+import { Toast } from './components/UI';
 
 /**
  * The root Application component.
@@ -23,18 +25,20 @@ import { BottomNav } from './components/BottomNav';
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<ViewState>('dashboard');
     const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
-    const { workouts, templates, customExercises, customMuscleGroups, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats, importData, addCustomExercise, deleteCustomExercise, addCustomMuscleGroup, deleteCustomMuscleGroup, saveTemplate } = useWorkoutStore();
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+    const { workouts, templates, customExercises, customMuscleGroups, addWorkout, updateWorkout, deleteWorkout, getRecentVolumeData, getMuscleHeatmapData, getHistory, getLastExerciseStats, importData, addCustomExercise, deleteCustomExercise, addCustomMuscleGroup, deleteCustomMuscleGroup, saveTemplate, deleteTemplate } = useWorkoutStore();
 
     const handleSaveTemplate = (workout: Workout) => {
         saveTemplate({
             id: Date.now().toString(),
-            name: `${workout.name} Template`,
+            name: workout.name,
             exercises: workout.exercises.map(ex => ({
                 ...ex,
                 sets: ex.sets.map(s => ({ ...s, completed: false, isPR: false }))
             }))
         });
-        alert('Workout saved as a Template!');
+        setToastMessage('Workout saved as Template!');
     };
 
     const handleSaveWorkout = (workout: Workout) => {
@@ -83,6 +87,7 @@ const App: React.FC = () => {
                                 customMuscleGroups={customMuscleGroups}
                                 customExercises={customExercises}
                                 templates={templates}
+                                onDeleteTemplate={deleteTemplate}
                             />
                         )}
                     </div>
@@ -104,6 +109,10 @@ const App: React.FC = () => {
                         />
                     </div>
 
+                    <div className={currentView === 'analytics' ? 'block' : 'hidden'}>
+                        <AnalyticsView workouts={getHistory()} />
+                    </div>
+
                     <div className={currentView === 'settings' ? 'block' : 'hidden'}>
                         <SettingsView
                             workouts={workouts}
@@ -117,6 +126,12 @@ const App: React.FC = () => {
                         />
                     </div>
                 </main>
+
+                <Toast
+                    message={toastMessage || ''}
+                    isVisible={toastMessage !== null}
+                    onClose={() => setToastMessage(null)}
+                />
 
                 <BottomNav currentView={currentView} setView={setCurrentView} />
             </div>
