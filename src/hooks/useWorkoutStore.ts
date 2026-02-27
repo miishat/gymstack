@@ -4,8 +4,9 @@
  * @author Mishat
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Workout, ExerciseSet, CustomExercise, WorkoutTemplate } from '../types';
+import { sortWorkouts, calculateHeatmap } from '../utils/workoutUtils';
 
 const STORAGE_KEY = 'auralift_workouts';
 const EXERCISES_KEY = 'auralift_custom_exercises';
@@ -59,7 +60,8 @@ export const useWorkoutStore = () => {
     const [workouts, setWorkouts] = useState<Workout[]>(() => {
         try {
             const item = window.localStorage.getItem(STORAGE_KEY);
-            return item ? JSON.parse(item) : [];
+            const loaded = item ? JSON.parse(item) : [];
+            return sortWorkouts(loaded);
         } catch (error) {
             console.warn('Error reading localStorage', error);
             return [];
@@ -133,7 +135,7 @@ export const useWorkoutStore = () => {
     const addWorkout = useCallback((workout: Workout) => {
         setWorkouts(prev => {
             const flaggedWorkout = flagPRs(workout, prev);
-            return [flaggedWorkout, ...prev];
+            return sortWorkouts([flaggedWorkout, ...prev]);
         });
     }, []);
 
@@ -141,7 +143,8 @@ export const useWorkoutStore = () => {
     const updateWorkout = useCallback((updatedWorkout: Workout) => {
         setWorkouts(prev => {
             const flaggedWorkout = flagPRs(updatedWorkout, prev);
-            return prev.map(w => w.id === flaggedWorkout.id ? flaggedWorkout : w);
+            const updated = prev.map(w => w.id === flaggedWorkout.id ? flaggedWorkout : w);
+            return sortWorkouts(updated);
         });
     }, []);
 
@@ -175,44 +178,31 @@ export const useWorkoutStore = () => {
     }, []);
 
     const importData = useCallback((workoutsData: Workout[], exercisesData: CustomExercise[], musclesData: string[]) => {
-        setWorkouts(workoutsData);
+        setWorkouts(sortWorkouts(workoutsData));
         setCustomExercises(exercisesData || []);
         setCustomMuscleGroups(musclesData || []);
     }, []);
 
     const getRecentVolumeData = useCallback(() => {
-        const recent = [...workouts].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(-7);
-        return recent.map(w => ({
+        // workouts is sorted descending (Newest -> Oldest). Take top 7.
+        const recent = workouts.slice(0, 7);
+        // Reverse to show oldest to newest on the chart
+        return [...recent].reverse().map(w => ({
             name: new Date(w.date).toLocaleDateString(undefined, { weekday: 'short' }),
             volume: w.volume
         }));
     }, [workouts]);
 
+    const muscleHeatmapData = useMemo(() => calculateHeatmap(workouts), [workouts]);
+
     const getMuscleHeatmapData = useCallback(() => {
-        const heatmap: Record<string, number> = {};
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-        workouts.forEach(workout => {
-            if (new Date(workout.date) >= oneWeekAgo) {
-                workout.exercises.forEach(ex => {
-                    const m = ex.muscleGroup;
-                    heatmap[m] = (heatmap[m] || 0) + ex.sets.reduce((acc, set) => acc + (set.weight * set.reps), 0);
-                });
-            }
-        });
-
-        const maxVol = Math.max(...Object.values(heatmap), 1);
-        return Object.keys(heatmap).map(muscle => ({
-            muscle,
-            intensity: (heatmap[muscle] / maxVol) * 100
-        }));
-    }, [workouts]);
+        return muscleHeatmapData;
+    }, [muscleHeatmapData]);
 
     // Smart Ghosting: Get the last logged sets for a specific exercise name
     const getLastExerciseStats = useCallback((exerciseName: string): ExerciseSet[] | null => {
-        const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        for (const workout of sortedWorkouts) {
+        // Workouts are already sorted descending
+        for (const workout of workouts) {
             const exercise = workout.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
             if (exercise && exercise.sets.length > 0) {
                 return exercise.sets;
@@ -222,7 +212,7 @@ export const useWorkoutStore = () => {
     }, [workouts]);
 
     const getHistory = useCallback(() => {
-        return [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return [...workouts];
     }, [workouts]);
 
     return {
