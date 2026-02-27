@@ -4,7 +4,7 @@
  * @author Mishat
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Workout, ExerciseSet, CustomExercise, WorkoutTemplate } from '../types';
 
 const STORAGE_KEY = 'auralift_workouts';
@@ -129,6 +129,11 @@ export const useWorkoutStore = () => {
         }
     }, [templates]);
 
+    // Memoize sorted workouts (descending by date) to avoid sorting on every render/access
+    const sortedWorkouts = useMemo(() => {
+        return [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [workouts]);
+
     /** Saves a completely new workout to the beginning of the history. */
     const addWorkout = useCallback((workout: Workout) => {
         setWorkouts(prev => {
@@ -181,12 +186,14 @@ export const useWorkoutStore = () => {
     }, []);
 
     const getRecentVolumeData = useCallback(() => {
-        const recent = [...workouts].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(-7);
+        // sortedWorkouts is DESC (newest first).
+        // Take first 7 (most recent), then reverse to make them chronological (oldest to newest) for the chart.
+        const recent = sortedWorkouts.slice(0, 7).reverse();
         return recent.map(w => ({
             name: new Date(w.date).toLocaleDateString(undefined, { weekday: 'short' }),
             volume: w.volume
         }));
-    }, [workouts]);
+    }, [sortedWorkouts]);
 
     const getMuscleHeatmapData = useCallback(() => {
         const heatmap: Record<string, number> = {};
@@ -211,7 +218,7 @@ export const useWorkoutStore = () => {
 
     // Smart Ghosting: Get the last logged sets for a specific exercise name
     const getLastExerciseStats = useCallback((exerciseName: string): ExerciseSet[] | null => {
-        const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        // Use memoized sorted list
         for (const workout of sortedWorkouts) {
             const exercise = workout.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
             if (exercise && exercise.sets.length > 0) {
@@ -219,11 +226,12 @@ export const useWorkoutStore = () => {
             }
         }
         return null;
-    }, [workouts]);
+    }, [sortedWorkouts]);
 
     const getHistory = useCallback(() => {
-        return [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }, [workouts]);
+        // Return a copy of the memoized sorted list to prevent mutation of the source
+        return [...sortedWorkouts];
+    }, [sortedWorkouts]);
 
     return {
         workouts,
